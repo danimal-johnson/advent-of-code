@@ -1,5 +1,5 @@
 /*
-Day 1: Rock Paper Scissors
+Day 2: Rock Paper Scissors
 
 Description:
 You are given a strategy guide to win a rock-paper-scissors tournament.

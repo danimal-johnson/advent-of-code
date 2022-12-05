@@ -6,9 +6,8 @@ Description:
 * Each elf has a range of sections to clean up.
 * Some of the ranges overlap.
 
-
 Input:
-* A text file (aoc2022_03.txt) with two ranges per line.
+* A text file (aoc2022_04.txt) with two ranges per line.
 * Format: 1st range start-end, 2nd range start-end (e.g. "1-5, 3-7")
 
 */
@@ -17,15 +16,6 @@ import { join } from 'path';
 
 let rawData = readFileSync(join(__dirname, './aoc2022_04.txt'), 'utf8');
 let lines = rawData.split('\n');
-
-// let testline = "7-96,6-95";
-// let [range1, range2] = testline.split(',');
-// range1;
-// range2;
-// let [start1, end1] = range1.split('-');
-// start1;
-// end1;
-
 
 // ------------ Part 1: ------------
 // Goal:

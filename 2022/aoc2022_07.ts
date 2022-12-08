@@ -10,13 +10,13 @@ Input:
 * Lines that start with "dir" indicate directories. Ex: "dir reindeer" means there is a directory named "reindeer"
 * Lines that start with a number indicate the size of a file. Ex: "10000 dasher.log" means there is a 10000 byte file named "dasher.log"
 
-
 */
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
 let rawData = readFileSync(join(__dirname, './aoc2022_07.txt'), 'utf8');
+// let rawData = readFileSync(join(__dirname, './day07ex.txt'), 'utf8');
 let lines = rawData.split('\n');
 
 class DataFile { // The name "File" is reserved
@@ -64,7 +64,6 @@ class Dir {
     this.sizeOfSubdirs += size;
     if (this.parent !== null) this.parent.updateSubdirSize(size);
   }
-
 }
 
 
@@ -137,6 +136,22 @@ const parseShellOutput = (lines: string[]) => {
 
 parseShellOutput(lines);
 
-root.subdirs[0].subdirs[0].files.length; //?
-root.subdirs[0].subdirs[0].getSize(); //?
-root.subdirs[0].subdirs[0].files[0].name; //?
+const dirsUnderMaxSize = (dir: Dir, maxSize: number, sum: number=0) => {
+  dir.subdirs.forEach((dir) => {
+    sum = dirsUnderMaxSize(dir, maxSize, sum);
+    if (dir.getSize() <= maxSize) sum += dir.getSize();
+  });
+  return sum;
+}
+
+// Part 1: Find the total size of all directories under 100,000 bytes
+// * Sizes include the size of all files and subdirectories
+// * Files may be counted more than once if their parent directories are small enough.
+// * Part 1 solution = 1,141,028
+console.log ('Part 1 solution:', dirsUnderMaxSize(root, 100_000)); //?
+
+// Part 2: Find a directory to delete that will free up enough space for the update.
+// * Total space available on device is 70,000,000 bytes
+// * The update requires 30,000,000 bytes
+// * The update will fail if there is not enough space to install the update
+

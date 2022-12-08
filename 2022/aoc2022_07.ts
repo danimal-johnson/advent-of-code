@@ -19,6 +19,7 @@ let rawData = readFileSync(join(__dirname, './aoc2022_07.txt'), 'utf8');
 // let rawData = readFileSync(join(__dirname, './day07ex.txt'), 'utf8');
 let lines = rawData.split('\n');
 
+// --------------- Data Structures ----------------
 class DataFile { // The name "File" is reserved
   name: string;
   size: number;
@@ -66,6 +67,7 @@ class Dir {
   }
 }
 
+// --------------- Parsing ----------------
 
 const parseLine = (line: string) => {
   const [command, ...rest] = line.split(' ');
@@ -78,12 +80,6 @@ const parseLine = (line: string) => {
   const [name] = rest;
   return { command: 'file', size: Number(command), name: rest[0] };
 };
-
-// parseLine('$ ls'); //?
-// parseLine('$ cd /'); //?
-// parseLine('dir reindeer'); //?
-// parseLine ('$ cd reindeer'); //?
-// parseLine('10000 dasher.log'); //?
 
 const root = new Dir( "/", null);
 
@@ -108,12 +104,12 @@ const parseShellOutput = (lines: string[]) => {
         break;
       case 'dir':
         // console.log('Creating dir:', path);
-        const newDir = new Dir(path || "", currentDir); // FIXME
+        const newDir = new Dir(path || "", currentDir);
         currentDir.addSubdir(newDir);
         break;
       case 'file':
         // console.log('file', name, size);
-        const newFile = new DataFile(name || "" , size || 0); // FIXME
+        const newFile = new DataFile(name || "" , size || 0);
         currentDir.addFile(newFile);
         break;
       case 'ls':
@@ -125,16 +121,14 @@ const parseShellOutput = (lines: string[]) => {
   });
 };
 
-// parseShellOutput([
-//   '$ cd /',
-//   '$ ls',
-//   'dir reindeer',
-//   '144 number1.txt',
-//   '$ cd reindeer',
-//   '12345 dasher.log',
-// ]);
-
 parseShellOutput(lines);
+
+// --------------- Solving ----------------
+
+// Part 1: Find the total size of all directories under 100,000 bytes
+// * Sizes include the size of all files and subdirectories
+// * Files may be counted more than once if their parent directories are small enough.
+// * Part 1 solution = 1,141,028
 
 const dirsUnderMaxSize = (dir: Dir, maxSize: number, sum: number=0) => {
   dir.subdirs.forEach((dir) => {
@@ -144,14 +138,29 @@ const dirsUnderMaxSize = (dir: Dir, maxSize: number, sum: number=0) => {
   return sum;
 }
 
-// Part 1: Find the total size of all directories under 100,000 bytes
-// * Sizes include the size of all files and subdirectories
-// * Files may be counted more than once if their parent directories are small enough.
-// * Part 1 solution = 1,141,028
 console.log ('Part 1 solution:', dirsUnderMaxSize(root, 100_000)); //?
 
-// Part 2: Find a directory to delete that will free up enough space for the update.
+// Part 2: Find the smallest directory to delete that will free up enough space for the update.
 // * Total space available on device is 70,000,000 bytes
 // * The update requires 30,000,000 bytes
 // * The update will fail if there is not enough space to install the update
+// * Part 2 solution = 8,278,005
 
+const TOTAL_MEMORY_SIZE = 70_000_000;
+const MIN_SPACE_NEEDED = 30_000_000;
+const spaceAvailable = TOTAL_MEMORY_SIZE - root.getSize(); //?
+const minSizeToDelete = MIN_SPACE_NEEDED - spaceAvailable; //?
+
+console.log(`Need to free up ${minSizeToDelete} bytes`);
+
+const smallestDirOverMinSize = (dir: Dir, minNeeded: number, minFound: number = TOTAL_MEMORY_SIZE) => {
+  let currentSize = dir.getSize();
+  if (currentSize >= minNeeded && currentSize < minFound) minFound = currentSize;
+  dir.subdirs.forEach((dir) => {
+    let submin = smallestDirOverMinSize(dir, minNeeded, minFound);
+    if (submin < minFound) minFound = submin;
+  });
+  return minFound;
+}
+
+console.log('Part 2 solution:', smallestDirOverMinSize(root, minSizeToDelete)); //?
